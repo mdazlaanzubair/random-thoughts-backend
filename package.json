@@ -1,0 +1,30 @@
+{
+  "name": "random-thoughts-backend-server",
+  "version": "1.0.0",
+  "description": "Backend of anonymous social media app.",
+  "main": "server.mjs",
+  "scripts": {
+    "start": "nodemon server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "express",
+    "node",
+    "javascript",
+    "cors",
+    "social",
+    "media",
+    "backend",
+    "api",
+    "mongoDB",
+    "netlify",
+    "react",
+    "mern"
+  ],
+  "author": "Muhammad Azlaan Zubair",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.1"
+  }
+}
