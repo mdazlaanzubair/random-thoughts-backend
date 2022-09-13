@@ -37,7 +37,7 @@ export const create = (req, res) => {
     .send({ thought: thought, message: "Thought Posted Successfully!" });
 };
 
-// controller that adds or remove like to a thought in the thoughts list
+// controller that adds like to a thought in the thoughts list
 export const like = (req, res) => {
   // getting id from the url
   const thought_id = req.params.id;
@@ -61,15 +61,55 @@ export const like = (req, res) => {
   });
 };
 
-// controller that updates a thought in the thoughts list
-export const update = (req, res) => {
+// controller that remove like to a thought in the thoughts list
+export const disLike = (req, res) => {
   // getting id from the url
   const thought_id = req.params.id;
 
   // finding index of the thought to be updated
-  var thoughtIndex = thoughts.findIndex((thought) => thought.id == thought_id);
+  let thoughtIndex = thoughts.findIndex((thought) => thought.id == thought_id);
+
+  // getting current likes
+  let current_likes = thoughts[thoughtIndex].likes;
+
+  // decrementing the like count of the thought object of that index
+  thoughts[thoughtIndex] = {
+    ...thoughts[thoughtIndex],
+    likes: current_likes - 1,
+  };
+
+  // returning response to the client
+  res.status(201).send({
+    thought: thoughts[thoughtIndex],
+    message: "Thought Liked Successfully!",
+  });
+};
+
+// controller that updates a thought in the thoughts list
+export const update = (req, res) => {
+  // finding index of the thought to be updated
+  let thoughtIndex = thoughts.findIndex(
+    (thought) => thought.id == req.params.id
+  );
 
   // updating the object of that index if user matches
+  // if index doesn't exist
+  if (thoughtIndex < 0) {
+    res.status(401).send({
+      message: "Thought not found.",
+    });
+    return;
+  }
+
+  // if index exists but user isn't the creator
+  if (thoughts[thoughtIndex].userIP != req.body.userIP) {
+    res.status(401).send({
+      message: "You aren't authorized to edit this thought.",
+    });
+    return;
+  }
+
+  // if index exists but user is the creator
   if (thoughts[thoughtIndex].userIP == req.body.userIP) {
     // updating thought
     thoughts[thoughtIndex] = {
@@ -79,15 +119,9 @@ export const update = (req, res) => {
     };
 
     // returning response to the client
-    res.status(204).send({
+    res.status(201).send({
       thought: thoughts[thoughtIndex],
       message: "Thought Updated Successfully!",
-    });
-    return;
-  } else {
-    // returning response to the client
-    res.status(401).send({
-      message: "You are not authorized to perform this action.",
     });
     return;
   }
@@ -95,15 +129,31 @@ export const update = (req, res) => {
 
 // controller that deletes a thought from the thoughts list
 export const destroy = (req, res) => {
-  // getting id from the url
-  const thought_id = req.params.id;
-
   // finding index of the thought to be updated
-  var thoughtIndex = thoughts.findIndex((thought) => thought.id == thought_id);
+  let thoughtIndex = thoughts.findIndex(
+    (thought) => thought.id == req.params.id
+  );
 
-  // deleting the object of that index if user matches
+  // updating the object of that index if user matches
+  // if index doesn't exist
+  if (thoughtIndex < 0) {
+    res.status(401).send({
+      message: "Thought not found.",
+    });
+    return;
+  }
+
+  // if index exists but user isn't the creator
+  if (thoughts[thoughtIndex].userIP != req.body.userIP) {
+    res.status(401).send({
+      message: "You aren't authorized to delete this thought.",
+    });
+    return;
+  }
+
+  // if index exists but user is the creator
   if (thoughts[thoughtIndex].userIP == req.body.userIP) {
-    // deleting thought
+    // updating thought
     thoughts[thoughtIndex] = {
       ...thoughts[thoughtIndex],
       deleted: true,
@@ -112,12 +162,6 @@ export const destroy = (req, res) => {
     // returning response to the client
     res.status(200).send({
       message: "Thought Deleted Successfully!",
-    });
-    return;
-  } else {
-    // returning response to the client
-    res.status(401).send({
-      message: "You are not authorized to perform this action.",
     });
     return;
   }
